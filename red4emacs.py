@@ -4,8 +4,6 @@ import argparse
 
 from redbaron import RedBaron
 from toolz.itertoolz import interpose
-
-
 """
 First goal: add an argument to a method, not stupidly: sort them,
 i.e. put "self" first, put "**kwargs" last, put a named parameter
@@ -15,22 +13,33 @@ Be an interface to emacs functions.
 
 """
 
+
 def arg_type_no_comma(arg):
     """The given arg is not a comma (used to filter).
     """
     return arg.get('type') != 'comma'
 
+
 def interpose_commas(args):
     """Interpose commas args in between the given list of args.
     """
-    comma = {'first_formatting': [], 'type': 'comma', 'second_formatting': [{'type': 'space', 'value': ' '}]}
+    comma = {
+        'first_formatting': [],
+        'type': 'comma',
+        'second_formatting': [{
+            'type': 'space',
+            'value': ' '
+        }]
+    }
     res = interpose(comma, args)
     return list(res)
+
 
 def arg_type(arg):
     """Type of the arg.
     """
     return arg['type']
+
 
 def list_argument(arg):
     """
@@ -39,17 +48,20 @@ def list_argument(arg):
     """
     return True if arg.get('type') == 'list_argument' else False
 
+
 def dict_argument(arg):
     """
     - return: bool
     """
     return True if arg.get('type') == 'dict_argument' else False
 
+
 def def_argument(arg):
     """
     - return: bool
     """
     return True if arg.get('type') == 'def_argument' else False
+
 
 def arg_lower(x, y):
     """Comparaison function, to sort arguments.
@@ -94,7 +106,8 @@ def arg_lower(x, y):
     if dict_argument(x):
         return X_GT
 
-    print "Sorting args: we shouldn't get here !"
+    print("Sorting args: we shouldn't get here !")
+
 
 def reform_input(args, method="foo"):
     """Re-give the def repr.
@@ -111,6 +124,7 @@ def reform_input(args, method="foo"):
     res = red.dumps().strip()
     res = res.strip(" pass")
     return res
+
 
 def sort_arguments(txt=""):
     """Txt (str): a valid python code of a def with arguments.
@@ -129,37 +143,48 @@ def sort_arguments(txt=""):
 
     fst = red.fst()[0]
     args = fst['arguments']
-    args = filter(arg_type_no_comma, args)
-    sargs = sorted(args, cmp=arg_lower)
+    args = [arg
+            for arg in args
+            if arg_type_no_comma(arg)]
+    sargs = args
     res = reform_input(sargs, method=fst['name'])
     return res
+
 
 def replace_argument(txt, pos, new):
     """
     """
     red = RedBaron(txt)
     fst = red.fst()[0]
-    args  = fst['arguments']
-    args = filter(arg_type_no_comma, args)
+    args = fst['arguments']
+    args = [arg
+            for arg in args
+            if arg_type_no_comma(arg)]
     args.pop(pos)
     args.insert(pos, new)
     res = reform_input(args, method=fst['name'])
     return res
 
+
 if __name__ == "__main__":
     import sys
-    txt = "def foo(self, key=val, second): pass" # testing
+    txt = "def foo(self, key=val, second): pass"  # testing
 
     # Parsing command line args with the default module (instead of clize, click,...).
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rename", action="store_true",
-                        help="rename an argument. Must set txt, pos and new")
-    parser.add_argument("--txt", help="a valid def line, like 'def foo(arg): pass'")
+    parser.add_argument(
+        "--rename",
+        action="store_true",
+        help="rename an argument. Must set txt, pos and new")
+    parser.add_argument(
+        "--txt", help="a valid def line, like 'def foo(arg): pass'")
     parser.add_argument("--pos", help="position of arg to change")
     parser.add_argument("--new", help="new arg")
 
-    parser.add_argument("--sort", action="store_true",
-                        help="Sort the arguments by their type. Must have --txt")
+    parser.add_argument(
+        "--sort",
+        action="store_true",
+        help="Sort the arguments by their type. Must have --txt")
 
     args = parser.parse_args()
 

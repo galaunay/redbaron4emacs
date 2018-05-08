@@ -199,7 +199,8 @@ If your args are on multiple lines, they will be written back in one. You'll nee
 (defun red4e-add-args-kwargs ()
   "Add *args, **kwargs to the method signature."
   (interactive)
-  (let ((args (-concat (red4e--get-function-args)  '("*args" "**kwargs"))))
+  (let ((args (-concat (red4e--get-function-args)  '("*args" "**kwargs")))
+        (args-one-line (red4e-args-on-one-line-p)))
     (red4e--write-args args)
     (or args-one-line (red4e-args-multi-line))))
 
@@ -220,7 +221,7 @@ If your args are on multiple lines, they will be written back in one. You'll nee
          ;; Choose which arg to modify
          (arg (if (equal (length args-list) 1)
                   (-first-item args-list)
-                (ido-completing-read+ "Arg to change ? " args-list)))
+                (completing-read "Arg to change ? " args-list)))
          ;; arg position
          (argpos (-elem-index arg args-list))
          ;; Ask for the modif
@@ -260,7 +261,7 @@ If your args are on multiple lines, they will be written back in one. You'll nee
   (interactive)
   (let* ((args-list (red4e--get-function-args))
          ;; (ido-separator "\n")
-         (arg (ido-completing-read+ "Arg to remove ? " args-list))
+         (arg (completing-read "Arg to remove ? " args-list))
          (args (-remove-item arg args-list)))
     (red4e--write-args args)))
 
@@ -412,7 +413,7 @@ not inside a defun."
   "
   (interactive)
   (let* ((decorators-list (red4e--decorators))
-         (decorator (ido-completing-read+ "Decorator: " decorators-list)))
+         (decorator (completing-read "Decorator: " decorators-list)))
     (red4e--decorator-add decorator))
   (save-buffer)
   )
